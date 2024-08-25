@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import userRouter from "../api/routes/users.routes.js";
+import clubRouter from "../api/routes/clubs.route.js";
 
 const app = express();
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // adding routes
-app.use("/api/", userRouter);
+app.use("/api", userRouter);
+app.use("/api", clubRouter);
 
 export default app;

@@ -1,9 +1,8 @@
-require("dotenv").config(); // Load environment variables
-const jwt = require("jsonwebtoken");
-const User = require("../models/User.model");
+import jwt from "jsonwebtoken";
+import User from "../models/users.model.js";
 
 // Middleware to authenticate the JWT token
-const authenticateToken = async (req, res, next) => {
+export const authenticateToken = async (req, res, next) => {
   try {
     const authorization = req.headers["authorization"]?.split(" ")[1];
     if (!authorization) {
@@ -16,7 +15,6 @@ const authenticateToken = async (req, res, next) => {
       if (decodedJwt) {
         const user = await User.findOne({
           _id: decodedJwt.id,
-          isArchived: false,
         });
         if (user) {
           req.currentUser = user;
@@ -37,6 +35,20 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  authenticateToken,
+export const isAdmin = async (req, res, next) => {
+  try {
+    const user = req.currentUser;
+
+    if (user.role === "admin") {
+      next();
+    } else {
+      throw new Error("Access not granted");
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "Failure",
+      message: "Access not granted",
+      systemMessage: err.message,
+    });
+  }
 };
