@@ -5,6 +5,7 @@ import {
   generateToken,
 } from "../utilities/auth.utilities.js";
 import bcrypt from "bcrypt";
+import { trimObject } from "../utilities/helper.utilities.js";
 
 // register User
 export const registerUser = async (req, res, next) => {
@@ -220,21 +221,72 @@ export const loginAdmin = async (req, res, next) => {
   }
 };
 
+// export const viewUsers = async (req, res, next) => {
+//   const page = parseInt(req?.query.page) || 1;
+//   const limit = parseInt(req?.query.limit) || 0;
+//   const userID = req.currentUser._id;
+
+//   try {
+//     const user = trimObject({
+//       isArchived: false,
+//       _id: userID,
+//       role: "admin",
+//     });
+
+//     const userList = await User.find(user)
+//       .skip(page * limit - limit)
+//       .limit(limit);
+
+//     console.log(user);
+//     const totalUsers = await User.countDocuments(user);
+
+//     if (totalUsers > 0) {
+//       return res.status(200).json({
+//         success: true,
+//         message: "Users retrieved successfully",
+//         developerMessage: "",
+//         result: userList,
+//         page,
+//         total: totalUsers,
+//       });
+//     } else {
+//       return res.status(200).json({
+//         success: true,
+//         message: "No users found",
+//         developerMessage: "",
+//         result: [],
+//         page,
+//         total: totalUsers,
+//       });
+//     }
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Could not retrieve users",
+//       developerMessage: error.message,
+//       result: [],
+//     });
+//   }
+// };
 export const viewUsers = async (req, res, next) => {
   const page = parseInt(req?.query.page) || 1;
   const limit = parseInt(req?.query.limit) || 0;
-  const userID = req.query.userID;
+  const userID = req.currentUser?._id; // Ensure currentUser is available
 
   try {
-    const user = trimObject({
-      isArchived: false,
-      _id: userID,
-      role: "admin",
-    });
+    let userFilter = {
+      // isArchived: false,
+      _id: { $ne: userID },
+    };
 
+    // Apply trimObject to clean up any unwanted fields
+    const user = trimObject(userFilter);
+
+    // Fetch the users from the database
     const userList = await User.find(user)
       .skip(page * limit - limit)
       .limit(limit);
+
     const totalUsers = await User.countDocuments(user);
 
     if (totalUsers > 0) {
@@ -257,6 +309,7 @@ export const viewUsers = async (req, res, next) => {
       });
     }
   } catch (error) {
+    console.error("Error:", error.message); // Debug the error
     return res.status(500).json({
       success: false,
       message: "Could not retrieve users",

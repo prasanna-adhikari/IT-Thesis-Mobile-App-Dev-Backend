@@ -9,11 +9,13 @@ const clubSchema = new mongoose.Schema({
   description: {
     type: String,
   },
-  admin_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // This references the User model
-    required: true,
-  },
+  admin_id: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // This references the User model
+      required: true,
+    },
+  ],
   created_at: {
     type: Date,
     default: Date.now,

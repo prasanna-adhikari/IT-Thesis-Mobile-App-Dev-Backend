@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import Club from "./clubs.model.js";
 const userSchema = new mongoose.Schema(
   {
     studentId: {
@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    followingClubs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Club", // Reference to the Club model
+      },
+    ],
     createdAt: {
       type: Date,
       default: Date.now,
