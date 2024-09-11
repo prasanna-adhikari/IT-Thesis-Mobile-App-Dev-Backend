@@ -18,6 +18,7 @@ const clubRouter = express.Router();
 clubRouter.post(
   "/create-club",
   authenticateToken,
+  isAdmin,
   validateClubBody,
   createClub
 );

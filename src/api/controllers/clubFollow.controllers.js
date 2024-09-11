@@ -28,9 +28,13 @@ export const followClub = async (req, res) => {
     user.followingClubs.push(clubId);
     await user.save();
 
+    // Fetch the updated user details
+    const updatedUser = await User.findById(userId).populate('followingClubs'); // populate followingClubs if needed
+
     return res.status(200).json({
       success: true,
       message: "Successfully followed the club.",
+      user: updatedUser, // Return the updated user details
     });
   } catch (error) {
     return res.status(500).json({
@@ -70,9 +74,13 @@ export const unfollowClub = async (req, res) => {
     );
     await user.save();
 
+    // Fetch the updated user details
+    const updatedUser = await User.findById(userId).populate('followingClubs'); // populate followingClubs if needed
+
     return res.status(200).json({
       success: true,
       message: "Successfully unfollowed the club.",
+      user: updatedUser, // Return the updated user details
     });
   } catch (error) {
     return res.status(500).json({
