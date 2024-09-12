@@ -7,13 +7,16 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
+    "@redis/client": "^1.6.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "dotnet": "^1.1.4",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.5.2"
+    "mongoose": "^8.5.2",
+    "redis": "^4.7.0",
+    "redis-server": "^1.2.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

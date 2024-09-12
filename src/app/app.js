@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import userRouter from "../api/routes/users.routes.js";
 import clubRouter from "../api/routes/clubs.route.js";
 import clubFollorRouter from "../api/routes/clubsfollow.route.js";
+import postRouter from "../api/routes/post.route.js";
+import newsfeedRouter from "../api/routes/newsfeed.route.js";
 
 const app = express();
 dotenv.config();
@@ -20,5 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", userRouter);
 app.use("/api", clubRouter);
 app.use("/api", clubFollorRouter);
+
+app.use("/api", postRouter);
+
+app.use("/api", newsfeedRouter);
 
 export default app;

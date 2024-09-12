@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Post from "./post.model.js"; // Import the Post model
 
 const clubSchema = new mongoose.Schema({
   name: {
@@ -12,8 +13,14 @@ const clubSchema = new mongoose.Schema({
   admin_id: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // This references the User model
+      ref: "User", // Reference to the User model
       required: true,
+    },
+  ],
+  posts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post", // Reference to the Post model
     },
   ],
   created_at: {
