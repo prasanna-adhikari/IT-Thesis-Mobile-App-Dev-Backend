@@ -21,19 +21,19 @@ const clubRouter = express.Router();
 
 // Route to create a club
 clubRouter.post(
-  "/clubs",
+  "/club",
   authenticateToken,
-  isAdmin,
-  validateClubBody,
+  isClubAdmin,
   upload.single("clubImage"),
+  validateClubBody,
   createClub
 );
 
 clubRouter.post(
   "/update-club/:clubId",
   authenticateToken,
-  isAdmin,
   upload.single("clubImage"),
+  isAdmin,
   updateClub
 );
 

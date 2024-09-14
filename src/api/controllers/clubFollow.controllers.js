@@ -94,7 +94,6 @@ export const unfollowClub = async (req, res) => {
 export const getFollowedClubs = async (req, res) => {
   try {
     const user = req.currentUser;
-
     // Fetching clubs that the user follows
     const followedClubs = await Club.find({
       _id: { $in: user.followingClubs },

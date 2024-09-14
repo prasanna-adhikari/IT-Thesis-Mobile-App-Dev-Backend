@@ -1,18 +1,20 @@
 // controllers/clubController.js
+import { trimObject } from "../utilities/helper.utilities.js";
+import Club from "../models/clubs.model.js";
 
 export const createClub = async (req, res) => {
   try {
     let { name, description } = req.body;
     const user = req.currentUser;
 
-    // Check if user is an admin
-    if (user.role !== "admin") {
-      return res.status(403).json({
-        status: "Failure",
-        message: "Access denied. Only admins can create clubs.",
-        systemMessage: "",
-      });
-    }
+    // // Check if user is an admin
+    // if (user.role !== "admin") {
+    //   return res.status(403).json({
+    //     status: "Failure",
+    //     message: "Access denied. Only admins can create clubs.",
+    //     systemMessage: "",
+    //   });
+    // }
 
     // Use trimObject to remove unnecessary spaces from the input fields
     const trimmedData = trimObject({ name, description });
@@ -52,7 +54,6 @@ export const createClub = async (req, res) => {
       result: newClub,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       status: "Failure",
       message: "An error occurred while creating the club.",
@@ -77,11 +78,17 @@ export const deleteClub = async (req, res) => {
       });
     }
 
+    // Fetch the remaining clubs
+    const remainingClubs = await Club.find({}); // Assuming you want all remaining clubs
+
     return res.status(200).json({
       status: "Success",
       message: "Club deleted successfully.",
       systemMessage: "",
-      result: deletedClub,
+      result: {
+        deletedClub, // The club that was deleted
+        remainingClubs, // All remaining clubs after deletion
+      },
     });
   } catch (error) {
     return res.status(500).json({

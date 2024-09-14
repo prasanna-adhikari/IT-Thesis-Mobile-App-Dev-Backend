@@ -10,9 +10,12 @@ import {
   viewUsers,
 } from "../controllers/user.controller.js";
 import { validateRegisterBody } from "../middleware/user.middleware.js";
-import { isAdmin, authenticateToken } from "../middleware/auth.middleware.js";
+import {
+  isAdmin,
+  authenticateToken,
+  isSuperuser,
+} from "../middleware/auth.middleware.js";
 import upload from "../middleware/upload.middleware.js";
-
 const userRouter = express.Router();
 
 // Use Multer to handle file upload (single file)

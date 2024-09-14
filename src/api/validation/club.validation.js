@@ -1,5 +1,3 @@
-// validation/club.validation.js
-
 import { isEmpty, isString } from "../utilities/validationFunction.js";
 
 export const clubValidation = (data) => {
@@ -8,55 +6,34 @@ export const clubValidation = (data) => {
     message: "",
   };
 
-  // Error messages
-  const nameRequiredMessage = "Club name is required.";
-  const invalidNameMessage = "The provided club name is not valid.";
-  const clubIdRequiredMessage = "Club ID is required.";
-  const invalidClubIdMessage = "The provided Club ID is not valid.";
-  const descriptionRequiredMessage = "Club description is required.";
-  const invalidDescriptionMessage =
-    "The provided club description is not valid.";
-
-  // Validate the description field
-  if (data.hasOwnProperty("description")) {
-    const trimmedDescription = data.description.trim();
-    if (isEmpty(trimmedDescription)) {
-      error.status = true;
-      error.message = descriptionRequiredMessage;
-    }
-  } else {
+  // Ensure data is an object and not null or undefined
+  if (typeof data !== "object" || data === null) {
     error.status = true;
-    error.message = descriptionRequiredMessage;
+    error.message = "Invalid data provided for validation.";
+    return error;
   }
 
+  // Parse form-data (form-data fields will come as strings)
+  const name = data.name ? data.name.toString().trim() : "";
+  const description = data.description
+    ? data.description.toString().trim()
+    : "";
+
+  // Error messages
+  const nameRequiredMessage = "Club name is required.";
+  const descriptionRequiredMessage = "Club description is required.";
+
   // Validate the name field
-  if (data.hasOwnProperty("name")) {
-    const trimmedName = data.name.trim();
-    if (isEmpty(trimmedName)) {
-      error.status = true;
-      error.message = nameRequiredMessage;
-    }
-  } else {
+  if (isEmpty(name)) {
     error.status = true;
     error.message = nameRequiredMessage;
   }
 
-  // Uncomment and use this code if clubId validation is required
-  /*
-  if (data.hasOwnProperty("clubId")) {
-    const trimmedClubId = data.clubId.trim();
-    if (isEmpty(trimmedClubId)) {
-      error.status = true;
-      error.message = clubIdRequiredMessage;
-    } else if (!isString(trimmedClubId)) {
-      error.status = true;
-      error.message = invalidClubIdMessage;
-    }
-  } else {
+  // Validate the description field
+  if (isEmpty(description)) {
     error.status = true;
-    error.message = clubIdRequiredMessage;
+    error.message = descriptionRequiredMessage;
   }
-  */
 
   return error;
 };

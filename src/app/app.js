@@ -7,6 +7,7 @@ import clubFollorRouter from "../api/routes/clubsfollow.route.js";
 import postRouter from "../api/routes/post.route.js";
 import newsfeedRouter from "../api/routes/newsfeed.route.js";
 import searchRouter from "../api/routes/search.route.js";
+import friendRequestRouter from "../api/routes/friendRequest.route.js";
 
 const app = express();
 dotenv.config();
@@ -26,5 +27,6 @@ app.use("/api", clubFollorRouter);
 app.use("/api", postRouter);
 app.use("/api", newsfeedRouter);
 app.use("/api", searchRouter);
+app.use("/api", friendRequestRouter);
 
 export default app;

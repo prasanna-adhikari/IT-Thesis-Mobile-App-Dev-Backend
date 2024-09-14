@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+// Define the allowed roles using an enum
+const rolesEnum = ["student", "club_admin", "admin", "superuser"];
+
 const userSchema = new mongoose.Schema(
   {
     studentId: {
@@ -22,8 +25,9 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
+      enum: rolesEnum, // Enum for roles
       required: true,
-      default: "student",
+      default: "student", // Default role
     },
     verified: {
       type: Boolean,
@@ -44,6 +48,12 @@ const userSchema = new mongoose.Schema(
         ref: "Post", // Reference to the Post model
       },
     ],
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User", // Reference to other users
+      },
+    ],
     createdAt: {
       type: Date,
       default: Date.now,
@@ -55,5 +65,4 @@ const userSchema = new mongoose.Schema(
 );
 
 const User = mongoose.model("User", userSchema);
-
 export default User;

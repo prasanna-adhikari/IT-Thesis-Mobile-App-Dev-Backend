@@ -10,6 +10,9 @@ const clubSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  clubImage: {
+    type: String, // Path to the user's profile image file
+  },
   admin_id: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -56,9 +56,12 @@ export const authenticateToken = async (req, res, next) => {
 export const isClubAdmin = async (req, res, next) => {
   try {
     const user = req.currentUser;
-
     // Check if the user's role is "club_admin" or higher (including "superuser")
-    if (user.role === "club_admin" || user.role === "superuser") {
+    if (
+      user.role === "club_admin" ||
+      user.role === "admin" ||
+      user.role === "superuser"
+    ) {
       next();
     } else {
       return res.status(403).json({

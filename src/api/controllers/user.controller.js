@@ -447,7 +447,8 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// update profile
+// update profile image
+
 export const updateUserProfileImage = async (req, res) => {
   const userId = req.currentUser;
 
@@ -479,14 +480,18 @@ export const updateUserProfileImage = async (req, res) => {
 
     // If the user already has a profile image, optionally remove the old one from the server
     if (user.profileImage) {
-      const oldImagePath = path.join(__dirname, "..", "..", user.profileImage);
+      const oldImagePath = path.join(process.cwd(), user.profileImage); // Use process.cwd() for absolute path
 
-      // Delete the old image file
-      fs.unlink(oldImagePath, (err) => {
-        if (err) {
-          console.error("Failed to delete old profile image:", err);
-        }
-      });
+      // Check if the old image file exists before trying to delete it
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlink(oldImagePath, (err) => {
+          if (err) {
+            console.error("Failed to delete old profile image:", err);
+          }
+        });
+      } else {
+        console.warn("Old profile image does not exist, skipping deletion.");
+      }
     }
 
     // Update the user's profile image
@@ -498,7 +503,7 @@ export const updateUserProfileImage = async (req, res) => {
       message: "Profile image updated successfully.",
       developerMessage: "",
       result: {
-        profileImage: user.profileImage,
+        user,
       },
     });
   } catch (error) {
