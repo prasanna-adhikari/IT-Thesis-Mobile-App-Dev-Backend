@@ -6,6 +6,14 @@ import {
 } from "../utilities/auth.utilities.js";
 import bcrypt from "bcrypt";
 import { trimObject } from "../utilities/helper.utilities.js";
+import fs from "fs";
+import path from "path";
+
+import { fileURLToPath } from "url";
+
+// Define __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // register User
 export const registerUser = async (req, res, next) => {
@@ -47,6 +55,9 @@ export const registerUser = async (req, res, next) => {
       });
     }
 
+    // Handle profile image (if provided)
+    const profileImage = req.file ? req.file.path : null;
+
     // Create new user
     const userObj = new User({
       studentId,
@@ -54,6 +65,7 @@ export const registerUser = async (req, res, next) => {
       email,
       password: hash,
       role,
+      profileImage, // Save profile image path (if uploaded)
       verified: false, // User is registered but not verified
     });
 
@@ -376,13 +388,7 @@ export const viewProfile = async (req, res) => {
       message: "User profile retrieved successfully.",
       systemMessage: "",
       result: {
-        studentId: user.studentId,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        verified: user.verified,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        user,
       },
     });
   } catch (error) {
@@ -437,6 +443,71 @@ export const updateProfile = async (req, res) => {
       status: "Failure",
       message: "An error occurred while updating the user profile.",
       systemMessage: error.message,
+    });
+  }
+};
+
+// update profile
+export const updateUserProfileImage = async (req, res) => {
+  const userId = req.currentUser;
+
+  try {
+    // Check if a file has been uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No profile image uploaded.",
+        developerMessage: "Please upload a valid image file.",
+        result: {},
+      });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+        developerMessage:
+          "The user trying to update their profile image does not exist.",
+        result: {},
+      });
+    }
+
+    // Store the file path of the new profile image
+    const newProfileImage = req.file.path;
+
+    // If the user already has a profile image, optionally remove the old one from the server
+    if (user.profileImage) {
+      const oldImagePath = path.join(__dirname, "..", "..", user.profileImage);
+
+      // Delete the old image file
+      fs.unlink(oldImagePath, (err) => {
+        if (err) {
+          console.error("Failed to delete old profile image:", err);
+        }
+      });
+    }
+
+    // Update the user's profile image
+    user.profileImage = newProfileImage;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile image updated successfully.",
+      developerMessage: "",
+      result: {
+        profileImage: user.profileImage,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the profile image.",
+      developerMessage: error.message,
+      result: {},
     });
   }
 };

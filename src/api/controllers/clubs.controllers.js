@@ -1,9 +1,5 @@
 // controllers/clubController.js
 
-import Club from "../models/clubs.model.js";
-import User from "../models/users.model.js";
-import { trimObject } from "../utilities/helper.utilities.js";
-
 export const createClub = async (req, res) => {
   try {
     let { name, description } = req.body;
@@ -31,7 +27,12 @@ export const createClub = async (req, res) => {
         systemMessage: "",
       });
     }
-    console.log(existingClub);
+
+    // Handle the image upload, if it exists
+    let clubImage = null;
+    if (req.file) {
+      clubImage = req.file.path; // Store the file path in the clubImage variable
+    }
 
     // Create a new club
     const newClub = new Club({
@@ -39,6 +40,7 @@ export const createClub = async (req, res) => {
       description: trimmedData.description,
       admin_id: user._id,
       created_at: new Date(),
+      clubImage, // Add the image path to the club model
     });
 
     await newClub.save();
@@ -187,6 +189,11 @@ export const updateClub = async (req, res) => {
       }
     }
 
+    // Handle the image upload, if it exists
+    if (req.file) {
+      club.clubImage = req.file.path; // Update club image with the uploaded file path
+    }
+
     // Save the updated club
     await club.save();
 
@@ -240,7 +247,6 @@ export const viewAllClubs = async (req, res) => {
 };
 
 // view single club
-// controllers/club.controller.js
 
 export const viewSingleClub = async (req, res) => {
   const { id } = req.params; // Get club ID from URL params

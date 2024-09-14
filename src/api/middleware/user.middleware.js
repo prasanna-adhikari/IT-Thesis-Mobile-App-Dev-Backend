@@ -1,7 +1,9 @@
 import { userValidation } from "../validation/user.validation.js";
 
 export const validateRegisterBody = (req, res, next) => {
-  const { status, message } = userValidation(req.body);
+  // Convert req.body to a plain object
+  const requestBody = Object.assign({}, req.body);
+  const { status, message } = userValidation(requestBody);
 
   if (status) {
     res.status(400).json({

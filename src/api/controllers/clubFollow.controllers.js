@@ -29,7 +29,7 @@ export const followClub = async (req, res) => {
     await user.save();
 
     // Fetch the updated user details
-    const updatedUser = await User.findById(userId).populate('followingClubs'); // populate followingClubs if needed
+    const updatedUser = await User.findById(userId).populate("followingClubs"); // populate followingClubs if needed
 
     return res.status(200).json({
       success: true,
@@ -75,7 +75,7 @@ export const unfollowClub = async (req, res) => {
     await user.save();
 
     // Fetch the updated user details
-    const updatedUser = await User.findById(userId).populate('followingClubs'); // populate followingClubs if needed
+    const updatedUser = await User.findById(userId).populate("followingClubs"); // populate followingClubs if needed
 
     return res.status(200).json({
       success: true,

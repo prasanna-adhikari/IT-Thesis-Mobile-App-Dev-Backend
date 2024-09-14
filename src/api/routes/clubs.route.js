@@ -9,21 +9,34 @@ import {
   viewAllClubs,
   viewSingleClub,
 } from "../controllers/clubs.controllers.js";
-import { authenticateToken, isAdmin } from "../middleware/auth.middleware.js";
+import {
+  authenticateToken,
+  isAdmin,
+  isClubAdmin,
+} from "../middleware/auth.middleware.js";
 import { validateClubBody } from "../middleware/club.middleware.js";
+import upload from "../middleware/upload.middleware.js";
 
 const clubRouter = express.Router();
 
-// Route to create a new club
+// Route to create a club
 clubRouter.post(
-  "/create-club",
+  "/clubs",
   authenticateToken,
   isAdmin,
   validateClubBody,
+  upload.single("clubImage"),
   createClub
 );
 
-clubRouter.post("/update-club/:clubId", authenticateToken, isAdmin, updateClub);
+clubRouter.post(
+  "/update-club/:clubId",
+  authenticateToken,
+  isAdmin,
+  upload.single("clubImage"),
+  updateClub
+);
+
 clubRouter.delete(
   "/delete-club/:clubId",
   authenticateToken,

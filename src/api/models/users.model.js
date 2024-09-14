@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Club from "./clubs.model.js";
+
 const userSchema = new mongoose.Schema(
   {
     studentId: {
@@ -29,10 +29,19 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    profileImage: {
+      type: String, // Path to the user's profile image file
+    },
     followingClubs: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Club", // Reference to the Club model
+      },
+    ],
+    posts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post", // Reference to the Post model
       },
     ],
     createdAt: {
