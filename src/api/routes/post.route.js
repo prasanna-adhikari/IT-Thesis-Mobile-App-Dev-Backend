@@ -17,7 +17,11 @@ import {
   updatePost,
   updateReply,
 } from "../controllers/post.controllers.js";
-import { authenticateToken, isAdmin } from "../middleware/auth.middleware.js";
+import {
+  authenticateToken,
+  isAdmin,
+  isClubAdmin,
+} from "../middleware/auth.middleware.js";
 import upload from "../middleware/upload.middleware.js";
 
 const postRouter = express.Router();
@@ -98,7 +102,7 @@ postRouter.put("/posts/:postId", upload.array("media", 10), updatePost);
 // Update event post
 postRouter.put(
   "/events/:postId",
-  isAdmin,
+  isClubAdmin,
   upload.array("media", 10),
   updateEventPost
 );

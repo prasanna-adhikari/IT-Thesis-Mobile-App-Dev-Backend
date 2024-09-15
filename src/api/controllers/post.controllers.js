@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const createPost = async (req, res) => {
-  console.log(req.body);
   const { clubId } = req.params;
   const { content } = req.body;
   const userId = req.currentUser._id;
