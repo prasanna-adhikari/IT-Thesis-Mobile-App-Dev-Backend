@@ -3,6 +3,7 @@ import express from "express";
 import { authenticateToken } from "../middleware/auth.middleware.js";
 import {
   acceptFriendRequest,
+  getFriendRequests,
   rejectFriendRequest,
   removeFriend,
   sendFriendRequest,
@@ -37,5 +38,10 @@ friendRequestRouter.delete(
   authenticateToken,
   removeFriend
 );
-
+// get incoming and outgoing friend requests
+friendRequestRouter.get(
+  "/friend-requests",
+  authenticateToken,
+  getFriendRequests
+);
 export default friendRequestRouter;
