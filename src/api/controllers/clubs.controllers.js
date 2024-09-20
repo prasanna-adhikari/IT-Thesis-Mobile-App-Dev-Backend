@@ -7,15 +7,6 @@ export const createClub = async (req, res) => {
     let { name, description } = req.body;
     const user = req.currentUser;
 
-    // // Check if user is an admin
-    // if (user.role !== "admin") {
-    //   return res.status(403).json({
-    //     status: "Failure",
-    //     message: "Access denied. Only admins can create clubs.",
-    //     systemMessage: "",
-    //   });
-    // }
-
     // Use trimObject to remove unnecessary spaces from the input fields
     const trimmedData = trimObject({ name, description });
     name = trimmedData.name;
@@ -36,6 +27,8 @@ export const createClub = async (req, res) => {
       clubImage = req.file.path; // Store the file path in the clubImage variable
     }
 
+    console.log(req.file);
+
     // Create a new club
     const newClub = new Club({
       name,
@@ -54,6 +47,7 @@ export const createClub = async (req, res) => {
       result: newClub,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: "Failure",
       message: "An error occurred while creating the club.",
@@ -257,7 +251,6 @@ export const viewAllClubs = async (req, res) => {
 
 export const viewSingleClub = async (req, res) => {
   const { id } = req.params; // Get club ID from URL params
-
   try {
     // Find the club by ID
     const club = await Club.findById(id);
@@ -281,6 +274,67 @@ export const viewSingleClub = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve club.",
+      developerMessage: error.message,
+      result: [],
+    });
+  }
+};
+
+// Search clubs by name or description with pagination
+export const searchClubs = async (req, res) => {
+  const { query } = req.query; // Get the search query from query parameters
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 results per page if not provided
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      message: "Search query not provided.",
+      developerMessage: "",
+      result: [],
+    });
+  }
+
+  try {
+    // Perform a case-insensitive search on the club name and description
+    const searchResults = await Club.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } }, // Case-insensitive search on name
+        { description: { $regex: query, $options: "i" } }, // Case-insensitive search on description
+      ],
+    })
+      .skip((page - 1) * limit) // Skip results for pagination
+      .limit(limit); // Limit the number of results per page
+
+    const totalResults = await Club.countDocuments({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+      ],
+    });
+
+    if (searchResults.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No clubs found matching the search query.",
+        developerMessage: "",
+        result: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Search results retrieved successfully.",
+      developerMessage: "",
+      result: searchResults,
+      page,
+      totalPages: Math.ceil(totalResults / limit),
+      totalResults,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search clubs.",
       developerMessage: error.message,
       result: [],
     });

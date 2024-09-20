@@ -5,6 +5,7 @@ import express from "express";
 import {
   createClub,
   deleteClub,
+  searchClubs,
   updateClub,
   viewAllClubs,
   viewSingleClub,
@@ -46,5 +47,8 @@ clubRouter.delete(
 
 clubRouter.get("/clubs/:id", authenticateToken, viewSingleClub);
 clubRouter.get("/clubs", authenticateToken, viewAllClubs);
+
+// Route to search clubs by query (name or description) with pagination
+clubRouter.get("/search-clubs", authenticateToken, searchClubs);
 
 export default clubRouter;

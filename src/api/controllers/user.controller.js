@@ -169,7 +169,7 @@ export const loginAdmin = async (req, res, next) => {
   try {
     const userFound = await User.findOne({
       email: email,
-      permissionLevel: "admin",
+      permissionLevel: "superuser",
       isArchived: false,
     });
 

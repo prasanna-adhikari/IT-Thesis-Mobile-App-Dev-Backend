@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -19,6 +20,8 @@ app.use(express.json());
 
 // To parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/uploads", express.static(path.join("src", "uploads")));
 
 // adding routes
 app.use("/api", userRouter);
