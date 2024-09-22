@@ -331,6 +331,41 @@ export const viewUsers = async (req, res, next) => {
   }
 };
 
+// Function to view a single user's detail by ID
+export const viewUserDetail = async (req, res, next) => {
+  const userId = req.params.userId; // Extract user ID from the request parameters
+  console.log(req.params);
+  try {
+    const user = await User.findById(userId)
+      .populate("friends", "name email profileImage")
+      .populate("posts")
+      .populate("followingClubs"); // Fetch the user by ID
+
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "User details retrieved successfully",
+        developerMessage: "",
+        result: user,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        developerMessage: "",
+        result: null,
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error.message); // Debug the error
+    return res.status(500).json({
+      success: false,
+      message: "Could not retrieve user details",
+      developerMessage: error.message,
+      result: null,
+    });
+  }
+};
 export const changePassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -513,6 +548,130 @@ export const updateUserProfileImage = async (req, res) => {
       message: "An error occurred while updating the profile image.",
       developerMessage: error.message,
       result: {},
+    });
+  }
+};
+
+// search user
+// Search users by admin with pagination and limit
+export const searchUsers = async (req, res, next) => {
+  const page = parseInt(req?.query.page) || 1; // Default to page 1
+  const limit = parseInt(req?.query.limit) || 10; // Default to 10 users per page
+  const userID = req.currentUser?._id; // Ensure currentUser is available
+  const searchQuery = req.query.query || ""; // Get the search query from request
+
+  try {
+    // Set up the filter to exclude the current user and apply search filters for name or email
+    let userFilter = {
+      _id: { $ne: userID },
+      $or: [
+        { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive search by name
+        { email: { $regex: searchQuery, $options: "i" } }, // Case-insensitive search by email
+      ],
+    };
+
+    // Clean up the filter object (trimObject could be a utility function you use)
+    const user = trimObject(userFilter);
+
+    // Fetch the filtered users with pagination
+    const userList = await User.find(user)
+      .skip(page * limit - limit) // Calculate the number of results to skip
+      .limit(limit); // Limit the results to the specified number per page
+
+    // Get the total count of filtered users
+    const totalUsers = await User.countDocuments(user);
+
+    // Check if any users were found
+    if (totalUsers > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Users retrieved successfully",
+        developerMessage: "",
+        result: userList,
+        page,
+        total: totalUsers,
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: "No users found",
+        developerMessage: "",
+        result: [],
+        page,
+        total: totalUsers,
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error.message); // Debug the error
+    return res.status(500).json({
+      success: false,
+      message: "Could not retrieve users",
+      developerMessage: error.message,
+      result: [],
+    });
+  }
+};
+
+// Update user by admin
+export const updateUserByAdmin = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const updateData = req.body;
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check for email uniqueness if email is being updated
+    if (updateData.email && updateData.email !== user.email) {
+      const emailExists = await User.findOne({ email: updateData.email });
+      if (emailExists) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+    }
+
+    // Update the user
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true, // Ensures that schema validations are applied
+    });
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating user",
+      error: error.message,
+    });
+  }
+};
+
+// Delete user by admin
+export const deleteUserByAdmin = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Perform the deletion
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({
+      message: "User deleted successfully",
+      deletedUserId: userId,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting user",
+      error: error.message,
     });
   }
 };

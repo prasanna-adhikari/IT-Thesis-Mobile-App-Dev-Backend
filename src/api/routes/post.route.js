@@ -9,7 +9,9 @@ import {
   deletePost,
   deleteReply,
   editComment,
+  getAllClubPosts,
   getAllPosts,
+  getAllUserPosts,
   getSinglePost,
   markGoingToEvent,
   markInterestInEvent,
@@ -33,11 +35,24 @@ postRouter.post(
   upload.array("media", 10),
   createPost
 );
+// Route to create a new post by user
+postRouter.post(
+  "/user/:userId/posts",
+  authenticateToken,
+  upload.array("media", 10),
+  createPost
+);
 // Route to get a single post by ID
 postRouter.get("/posts/:postId", authenticateToken, getSinglePost);
 
 // Route to get all posts for a club
-postRouter.get("/clubs/:clubId/posts", authenticateToken, getAllPosts);
+postRouter.get("/clubs/:clubId/posts", authenticateToken, getAllClubPosts);
+
+// get all post
+postRouter.get("/posts", authenticateToken, getAllPosts);
+
+// Route to get all posts for a user
+postRouter.get("/clubs/:userId/posts", authenticateToken, getAllUserPosts);
 
 // Route to delete post
 postRouter.delete("/posts/:postId", authenticateToken, deletePost);

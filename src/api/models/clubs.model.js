@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Post from "./post.model.js"; // Import the Post model
+import User from "./users.model.js";
 
 const clubSchema = new mongoose.Schema({
   name: {

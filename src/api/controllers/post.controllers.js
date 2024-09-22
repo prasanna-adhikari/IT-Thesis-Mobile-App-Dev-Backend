@@ -104,16 +104,86 @@ export const getAllPosts = async (req, res) => {
 
   try {
     // Find all posts associated with the club, with pagination
+    const posts = await Post.find()
+      .populate("likes")
+      .populate("shares")
+      .populate("comments.userId")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Count total number of posts for the club (for pagination purposes)
+    const totalPosts = await Post.countDocuments();
+
+    return res.status(200).json({
+      success: true,
+      message: "Posts retrieved successfully.",
+      total: totalPosts,
+      page,
+      posts,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the posts.",
+      systemMessage: error.message,
+    });
+  }
+};
+
+export const getAllClubPosts = async (req, res) => {
+  const { clubId } = req.params;
+  const page = parseInt(req.query.page) || 1; // Page number for pagination
+  const limit = parseInt(req.query.limit) || 10; // Limit for pagination
+
+  try {
+    // Find all posts associated with the club, with pagination
     const posts = await Post.find({ clubId })
       .populate("clubId")
       .populate("likes")
       .populate("shares")
       .populate("comments.userId")
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
     // Count total number of posts for the club (for pagination purposes)
     const totalPosts = await Post.countDocuments({ clubId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Posts retrieved successfully.",
+      total: totalPosts,
+      page,
+      posts,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the posts.",
+      systemMessage: error.message,
+    });
+  }
+};
+
+export const getAllUserPosts = async (req, res) => {
+  const { clubId } = req.params;
+  const page = parseInt(req.query.page) || 1; // Page number for pagination
+  const limit = parseInt(req.query.limit) || 10; // Limit for pagination
+
+  try {
+    // Find all posts associated with the club, with pagination
+    const posts = await Post.find({ userId })
+      .populate("clubId")
+      .populate("likes")
+      .populate("shares")
+      .populate("comments.userId")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Count total number of posts for the club (for pagination purposes)
+    const totalPosts = await Post.countDocuments({ userId });
 
     return res.status(200).json({
       success: true,

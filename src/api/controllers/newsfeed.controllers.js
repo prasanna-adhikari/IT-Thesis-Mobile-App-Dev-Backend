@@ -8,7 +8,9 @@ export const getNewsfeed = async (req, res) => {
 
   try {
     // Fetch the user to get the list of followed clubs
-    const user = await User.findById(userId).populate("followingClubs");
+    const user = await User.findById(userId, verified)
+      .populate("followingClubs")
+      .sort({ createdAt: -1 });
     if (!user) {
       return res.status(404).json({
         success: false,

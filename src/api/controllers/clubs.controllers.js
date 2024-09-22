@@ -1,7 +1,8 @@
 // controllers/clubController.js
 import { trimObject } from "../utilities/helper.utilities.js";
 import Club from "../models/clubs.model.js";
-
+import mongoose from "mongoose";
+import User from "../models/users.model.js";
 export const createClub = async (req, res) => {
   try {
     let { name, description } = req.body;
@@ -215,7 +216,6 @@ export const updateClub = async (req, res) => {
 };
 
 // view all clubs
-// controllers/club.controller.js
 
 export const viewAllClubs = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -225,17 +225,40 @@ export const viewAllClubs = async (req, res) => {
     // Fetch all clubs with pagination
     const clubs = await Club.find()
       .skip((page - 1) * limit)
+      .sort({ createdAt: -1 })
       .limit(limit);
 
+    // Count total clubs in the collection
     const totalClubs = await Club.countDocuments();
+
+    // Fetch followers count for each club
+    const clubsWithFollowers = await Promise.all(
+      clubs.map(async (club) => {
+        // Fetch followers count
+        const followersCount = await User.countDocuments({
+          followingClubs: club._id,
+        });
+
+        // Optionally fetch follower details
+        const followers = await User.find({ followingClubs: club._id }).select(
+          "name email profileImage"
+        );
+
+        return {
+          ...club.toObject(), // Convert club document to a plain object
+          followersCount, // Add the followers count to each club
+          followers, // Add followers details if needed
+        };
+      })
+    );
 
     return res.status(200).json({
       success: true,
       message: "Clubs retrieved successfully.",
       developerMessage: "",
-      result: clubs,
+      result: clubsWithFollowers,
       page,
-      total: totalClubs,
+      totalClubs,
     });
   } catch (error) {
     return res.status(500).json({
@@ -256,11 +279,23 @@ export const viewSingleClub = async (req, res) => {
     const club = await Club.findById(id);
 
     if (club) {
+      // Find followers of the club by querying the User model
+      const followers = await User.find({ followingClubs: id }).select(
+        "name email profileImage"
+      );
+
+      // Get the number of followers
+      const followersCount = followers.length;
+
       return res.status(200).json({
         success: true,
         message: "Club retrieved successfully.",
         developerMessage: "",
-        result: club,
+        result: {
+          ...club.toObject(), // Convert the club to a plain object
+          followersCount, // Add the followers count
+          followers, // Add followers details (name, email, profileImage)
+        },
       });
     } else {
       return res.status(404).json({
@@ -279,8 +314,8 @@ export const viewSingleClub = async (req, res) => {
     });
   }
 };
-
 // Search clubs by name or description with pagination
+
 export const searchClubs = async (req, res) => {
   const { query } = req.query; // Get the search query from query parameters
   const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
@@ -322,14 +357,34 @@ export const searchClubs = async (req, res) => {
       });
     }
 
+    // Fetch followers count and details for each club in search results
+    const clubsWithFollowers = await Promise.all(
+      searchResults.map(async (club) => {
+        const followersCount = await User.countDocuments({
+          followingClubs: club._id,
+        });
+
+        // Optionally fetch follower details
+        const followers = await User.find({ followingClubs: club._id }).select(
+          "name email profileImage"
+        );
+
+        return {
+          ...club.toObject(), // Convert club document to a plain object
+          followersCount, // Add the followers count to each club
+          followers, // Add followers details if needed
+        };
+      })
+    );
+
     return res.status(200).json({
       success: true,
       message: "Search results retrieved successfully.",
       developerMessage: "",
-      result: searchResults,
+      result: clubsWithFollowers, // Return clubs with followers information
       page,
+      totalClubs: totalResults,
       totalPages: Math.ceil(totalResults / limit),
-      totalResults,
     });
   } catch (error) {
     return res.status(500).json({
