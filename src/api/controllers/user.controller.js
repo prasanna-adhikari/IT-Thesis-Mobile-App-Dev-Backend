@@ -139,7 +139,8 @@ export const loginUser = async (req, res, next) => {
       } else {
         res.status(400).json({
           success: false,
-          message: "User is not verified",
+          message:
+            "User is not verified. Please contact administration to verify the account.",
           developerMessage: "",
           result: {},
         });

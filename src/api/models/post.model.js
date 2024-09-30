@@ -46,7 +46,10 @@ const postSchema = new mongoose.Schema({
   clubId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Club",
-    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
   content: {
     type: String,

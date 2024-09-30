@@ -4,10 +4,12 @@ import {
   addReplyToComment,
   createEventPost,
   createPost,
+  createUserPost,
   deleteComment,
   deleteEventPost,
   deletePost,
   deleteReply,
+  deleteUserPost,
   editComment,
   getAllClubPosts,
   getAllPosts,
@@ -18,6 +20,7 @@ import {
   updateEventPost,
   updatePost,
   updateReply,
+  updateUserPost,
 } from "../controllers/post.controllers.js";
 import {
   authenticateToken,
@@ -40,7 +43,7 @@ postRouter.post(
   "/user/:userId/posts",
   authenticateToken,
   upload.array("media", 10),
-  createPost
+  createUserPost
 );
 // Route to get a single post by ID
 postRouter.get("/posts/:postId", authenticateToken, getSinglePost);
@@ -52,7 +55,7 @@ postRouter.get("/clubs/:clubId/posts", authenticateToken, getAllClubPosts);
 postRouter.get("/posts", authenticateToken, getAllPosts);
 
 // Route to get all posts for a user
-postRouter.get("/clubs/:userId/posts", authenticateToken, getAllUserPosts);
+postRouter.get("/user/:userId/posts", authenticateToken, getAllUserPosts);
 
 // Route to delete post
 postRouter.delete("/posts/:postId", authenticateToken, deletePost);
@@ -139,3 +142,9 @@ postRouter.put(
   upload.array("media", 3),
   updateReply
 );
+
+// Route to get all posts for a user
+postRouter.delete("/user/:userId/posts", authenticateToken, deleteUserPost);
+
+// Route to update all posts for a user
+postRouter.put("/user/:userId/posts", authenticateToken, updateUserPost);

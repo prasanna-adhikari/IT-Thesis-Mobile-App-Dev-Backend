@@ -31,7 +31,7 @@ userRouter.post(
 );
 userRouter.post("/user/login", validateRegisterBody, loginUser);
 userRouter.post("/admin/login", validateRegisterBody, loginAdmin);
-userRouter.get("/user/view", authenticateToken, isAdmin, viewUsers);
+userRouter.get("/user/view", authenticateToken, viewUsers);
 userRouter.get(
   "/user/view/:userId",
   authenticateToken,

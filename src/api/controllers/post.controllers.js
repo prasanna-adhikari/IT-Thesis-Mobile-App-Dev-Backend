@@ -1,5 +1,6 @@
 import Post from "../models/post.model.js";
 import Club from "../models/clubs.model.js";
+import User from "../models/users.model.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -50,6 +51,55 @@ export const createPost = async (req, res) => {
     // Add the post to the club's posts array
     club.posts.push(savedPost._id);
     await club.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Post created successfully.",
+      post: savedPost,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while creating the post.",
+      systemMessage: error.message,
+    });
+  }
+};
+
+export const createUserPost = async (req, res) => {
+  const { content } = req.body;
+  const userId = req.currentUser._id;
+  console.log(userId);
+
+  try {
+    // Find the user to ensure it exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Prepare the media file paths (if any were uploaded)
+    const media = req.files ? req.files.map((file) => file.path) : [];
+
+    // Create a new post
+    const newPost = new Post({
+      userId: user._id,
+      content,
+      media, // Save the media file paths in the post
+      likes: [],
+      shares: [],
+      comments: [],
+    });
+
+    // Save the new post
+    const savedPost = await newPost.save();
+
+    // Add the post to the user's posts array
+    user.posts.push(savedPost._id);
+    await user.save();
 
     return res.status(201).json({
       success: true,
@@ -167,7 +217,8 @@ export const getAllClubPosts = async (req, res) => {
 };
 
 export const getAllUserPosts = async (req, res) => {
-  const { clubId } = req.params;
+  const { userId } = req.params;
+  console.log(userId);
   const page = parseInt(req.query.page) || 1; // Page number for pagination
   const limit = parseInt(req.query.limit) || 10; // Limit for pagination
 
@@ -941,6 +992,98 @@ export const updateReply = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while updating the reply.",
+      systemMessage: error.message,
+    });
+  }
+};
+
+// User update post
+export const updateUserPost = async (req, res) => {
+  const { postId } = req.params;
+  const userId = req.currentUser._id;
+  const { content } = req.body;
+
+  try {
+    // Find the post by ID
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found.",
+      });
+    }
+
+    // Check if the user is the owner of the post
+    if (post.userId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to update this post.",
+      });
+    }
+
+    // Update post content and/or media
+    if (content) post.content = content;
+    if (req.files) {
+      const media = req.files.map((file) => file.path);
+      post.media = media;
+    }
+
+    // Save the updated post
+    const updatedPost = await post.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Post updated successfully.",
+      post: updatedPost,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the post.",
+      systemMessage: error.message,
+    });
+  }
+};
+
+// user delete post
+export const deleteUserPost = async (req, res) => {
+  const { postId } = req.params;
+  const userId = req.currentUser._id;
+
+  try {
+    // Find the post by ID
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found.",
+      });
+    }
+
+    // Check if the user is the owner of the post
+    if (post.userId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this post.",
+      });
+    }
+
+    // Delete the post
+    await post.remove();
+
+    // Remove the post reference from the user's posts array
+    await User.findByIdAndUpdate(userId, {
+      $pull: { posts: postId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Post deleted successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while deleting the post.",
       systemMessage: error.message,
     });
   }
